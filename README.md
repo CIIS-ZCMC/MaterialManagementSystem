@@ -263,14 +263,6 @@ composer ci:check
 | `php artisan route:list` | View all registered application routes |
 | `npm run build` | Compile and bundle production assets |
 
----
-
-## 🏥 ZCMC Systems Ecosystem
-
-| System | Role | Path / Reference |
-| :--- | :--- | :--- |
-| **MaterialManagementSystem** | Hospital Materials, Supply Chain & Inventory | `D:\ZCMC_SYSTEMS\MaterialManagementSystem` |
-| **DTRService** | Biometric Terminals, Real-time Attendance & DTR | `D:\ZCMC_SYSTEMS\DTRService` |
 
 ---
 
