@@ -277,7 +277,7 @@ composer ci:check
 <div align="center">
 
 **Zamboanga City Medical Center (ZCMC)**  
-*Management Information Systems & IT Department*  
+*Management Information Systems & IMISS*  
 © 2026 ZCMC. All rights reserved.
 
 </div>
