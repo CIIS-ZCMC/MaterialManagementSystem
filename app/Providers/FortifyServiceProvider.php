@@ -3,12 +3,15 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
@@ -39,6 +42,23 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureActions(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+
+        // Log in with employee number; block deactivated accounts
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('employee_no', $request->input('employee_no'))->first();
+
+            if (! $user || ! Hash::check($request->input('password'), $user->password)) {
+                return null; // normal "credentials don't match" error
+            }
+
+            if (! $user->is_active) {
+                throw ValidationException::withMessages([
+                    'employee_no' => 'This account is deactivated. Please contact the administrator.',
+                ]);
+            }
+
+            return $user;
+        });
     }
 
     /**
@@ -60,7 +80,6 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/forgot-password', [
             'status' => $request->session()->get('status'),
         ]));
-
     }
 
     /**
@@ -68,12 +87,10 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureRateLimiting(): void
     {
-
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
         });
-
     }
 }
